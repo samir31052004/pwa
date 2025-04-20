@@ -255,8 +255,19 @@ export const signInDriver = async (email, password) => {
       .single()
 
     if (driverError) {
+      if (driverError.code === 'PGRST116') {
+        const error = new Error('No driver account found for this email')
+        error.code = 'DRIVER_NOT_FOUND'
+        throw error
+      }
       console.error('Driver lookup error:', driverError)
       throw driverError
+    }
+
+    if (!driver) {
+      const error = new Error('Driver account not found')
+      error.code = 'DRIVER_NOT_FOUND'
+      throw error
     }
 
     return { session: data.session, driver }
